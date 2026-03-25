@@ -404,6 +404,26 @@
     <div class="section-desc">How you got here — the process of finding out what your child was dealing with, and what happened right after.</div>
 
     <div class="question">
+      <label class="question-label">Before any formal diagnosis, what did your child's regular doctor (PCP or pediatrician) say when you brought up your concerns?</label>
+      <span class="question-hint">Did they take you seriously, refer you somewhere, suggest waiting it out, or offer their own explanation? How long did you rely on their guidance before seeking a specialist?</span>
+      <textarea placeholder="What your PCP said, and how that shaped what you did next..."></textarea>
+    </div>
+
+    <div class="question">
+      <label class="question-label">Did your PCP ever diagnose your child themselves — without referring you to a psychologist or psychiatrist for a full evaluation?</label>
+      <div class="radio-group">
+        <label><input type="radio" name="pcp-dx"> Yes — the PCP diagnosed my child directly</label>
+        <label><input type="radio" name="pcp-dx"> Yes — and they also prescribed medication based on that diagnosis</label>
+        <label><input type="radio" name="pcp-dx"> No — they referred us to a specialist</label>
+        <label><input type="radio" name="pcp-dx"> No — they dismissed my concerns without diagnosing or referring</label>
+        <label><input type="radio" name="pcp-dx"> I never brought it up with the PCP — we started somewhere else</label>
+      </div>
+      <div style="margin-top: 12px;">
+        <textarea placeholder="Any details about that experience..."></textarea>
+      </div>
+    </div>
+
+    <div class="question">
       <label class="question-label">How old was your child when they were first evaluated or diagnosed?</label>
       <input type="text" placeholder="e.g. 5 years old, kindergarten year">
     </div>
@@ -558,9 +578,17 @@
   <!-- Submit -->
   <div class="submit-area">
     <h3>When you're finished</h3>
-    <p>Copy your answers to share with your collaborator, or print this page for your records. Your responses will be used to shape a resource that helps other parents find their way faster than you did.</p>
-    <button class="btn-copy" onclick="copyAnswers()">Copy All Answers</button>
-    <button class="btn-print" onclick="window.print()">Print / Save as PDF</button>
+    <p>Submit your responses below. Your answers go directly to the project team and will be used to shape a resource that helps other parents find their way faster than you did. Nothing is shared publicly without your permission.</p>
+    <form id="mainForm" action="https://formspree.io/f/mwvwenen" method="POST" onsubmit="handleSubmit(event)">
+      <input type="hidden" name="respondent_name" id="fs-name">
+      <input type="hidden" name="respondent_relation" id="fs-relation">
+      <input type="hidden" name="child_name" id="fs-child">
+      <input type="hidden" name="all_responses" id="fs-responses">
+      <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-bottom:16px;">
+        <button type="submit" class="btn-copy">Submit My Responses</button>
+        <button type="button" class="btn-print" onclick="window.print()">Print / Save as PDF</button>
+      </div>
+    </form>
     <div class="copy-status" id="copyStatus"></div>
   </div>
 
@@ -572,9 +600,6 @@
     const all = document.querySelectorAll('textarea, input[type="text"]');
     let filled = 0;
     all.forEach(el => { if (el.value.trim().length > 2) filled++; });
-    const checks = document.querySelectorAll('input[type="checkbox"]:checked, input[type="radio"]:checked');
-    filled += checks.length;
-    const total = all.length + document.querySelectorAll('input[type="checkbox"], input[type="radio"]').length * 0.2;
     const pct = Math.min(100, Math.round((filled / all.length) * 100));
     document.getElementById('progressFill').style.width = pct + '%';
     document.getElementById('pct').textContent = pct + '% complete';
@@ -583,8 +608,8 @@
   document.addEventListener('input', updateProgress);
   document.addEventListener('change', updateProgress);
 
-  // Copy answers
-  function copyAnswers() {
+  // Build formatted response string
+  function buildResponses() {
     const name = document.getElementById('resp-name').value || 'Respondent';
     const child = document.getElementById('child-name').value || 'Child';
     let out = `FINDING THE PATH — QUESTIONNAIRE RESPONSES\n`;
@@ -615,14 +640,41 @@
         out += '\n';
       });
     });
+    return out;
+  }
 
-    navigator.clipboard.writeText(out).then(() => {
-      const st = document.getElementById('copyStatus');
-      st.textContent = '✓ Answers copied to clipboard. Paste into an email or document to share.';
-      setTimeout(() => { st.textContent = ''; }, 5000);
-    }).catch(() => {
-      document.getElementById('copyStatus').textContent = 'Could not copy automatically — try printing instead.';
-    });
+  // Formspree submission
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const st = document.getElementById('copyStatus');
+
+    // Populate hidden fields
+    document.getElementById('fs-name').value = document.getElementById('resp-name').value;
+    document.getElementById('fs-relation').value = document.getElementById('resp-relation').value;
+    document.getElementById('fs-child').value = document.getElementById('child-name').value;
+    document.getElementById('fs-responses').value = buildResponses();
+
+    st.textContent = 'Sending...';
+
+    const form = document.getElementById('mainForm');
+    const data = new FormData(form);
+
+    try {
+      const res = await fetch('https://formspree.io/f/mwvwenen', {
+        method: 'POST',
+        body: data,
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        st.textContent = '✓ Your responses have been submitted. Thank you for sharing your story.';
+        form.querySelector('button[type="submit"]').disabled = true;
+        form.querySelector('button[type="submit"]').textContent = 'Submitted ✓';
+      } else {
+        st.textContent = 'Something went wrong. Please try printing your responses instead.';
+      }
+    } catch {
+      st.textContent = 'Could not connect. Please try printing your responses instead.';
+    }
   }
 </script>
 </body>
