@@ -362,6 +362,18 @@
       <input type="text" id="resp-relation" placeholder="e.g. Father, Mother, Co-parent">
     </div>
   </div>
+  <div class="name-row" style="margin-bottom: 16px;">
+    <div>
+      <label class="field-label" for="resp-email">Your email <span style="color:var(--soft-red);">*</span></label>
+      <input type="text" id="resp-email" placeholder="e.g. yourname@email.com">
+      <span style="font-size:12px; color:var(--accent-light); margin-top:5px; display:block;">So we can follow up if needed. Never shared publicly.</span>
+    </div>
+    <div>
+      <label class="field-label" for="resp-phone">Phone number <span style="font-weight:400; text-transform:none; letter-spacing:0; color:var(--accent-light);">(optional)</span></label>
+      <input type="text" id="resp-phone" placeholder="e.g. 555-867-5309">
+      <span style="font-size:12px; color:var(--accent-light); margin-top:5px; display:block;">Only used if you'd like us to reach out directly.</span>
+    </div>
+  </div>
   <div style="margin-bottom: 40px;">
     <label class="field-label" for="child-name">Child's first name (or nickname is fine)</label>
     <input type="text" id="child-name" placeholder="e.g. Gage">
@@ -578,17 +590,22 @@
   <!-- Submit -->
   <div class="submit-area">
     <h3>When you're finished</h3>
-    <p>Submit your responses below. Your answers go directly to the project team and will be used to shape a resource that helps other parents find their way faster than you did. Nothing is shared publicly without your permission.</p>
+    <p>Hit <strong>Submit My Responses</strong> below — that's what sends your answers to us. Once submitted, a <strong>Print / Save as PDF</strong> button will appear so you can keep a copy for yourself.</p>
     <form id="mainForm" action="https://formspree.io/f/mwvwenen" method="POST" onsubmit="handleSubmit(event)">
       <input type="hidden" name="respondent_name" id="fs-name">
       <input type="hidden" name="respondent_relation" id="fs-relation">
+      <input type="hidden" name="respondent_email" id="fs-email">
+      <input type="hidden" name="respondent_phone" id="fs-phone">
       <input type="hidden" name="child_name" id="fs-child">
       <input type="hidden" name="all_responses" id="fs-responses">
       <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-bottom:16px;">
-        <button type="submit" class="btn-copy">Submit My Responses</button>
-        <button type="button" class="btn-print" onclick="window.print()">Print / Save as PDF</button>
+        <button type="submit" class="btn-copy" id="submitBtn">Submit My Responses</button>
       </div>
     </form>
+    <div id="printWrap" style="display:none; margin-top:16px;">
+      <button type="button" class="btn-print" onclick="window.print()">Print / Save as PDF</button>
+      <p style="font-size:12px; color:var(--accent-light); margin-top:8px;">Save or print a copy of your responses for your records.</p>
+    </div>
     <div class="copy-status" id="copyStatus"></div>
   </div>
 
@@ -651,6 +668,8 @@
     // Populate hidden fields
     document.getElementById('fs-name').value = document.getElementById('resp-name').value;
     document.getElementById('fs-relation').value = document.getElementById('resp-relation').value;
+    document.getElementById('fs-email').value = document.getElementById('resp-email').value;
+    document.getElementById('fs-phone').value = document.getElementById('resp-phone').value;
     document.getElementById('fs-child').value = document.getElementById('child-name').value;
     document.getElementById('fs-responses').value = buildResponses();
 
@@ -667,8 +686,9 @@
       });
       if (res.ok) {
         st.textContent = '✓ Your responses have been submitted. Thank you for sharing your story.';
-        form.querySelector('button[type="submit"]').disabled = true;
-        form.querySelector('button[type="submit"]').textContent = 'Submitted ✓';
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('submitBtn').textContent = 'Submitted ✓';
+        document.getElementById('printWrap').style.display = 'block';
       } else {
         st.textContent = 'Something went wrong. Please try printing your responses instead.';
       }
