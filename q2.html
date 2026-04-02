@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parent Pathfinder — Your Experience Matters</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --paper: #faf8f3;
+    --warm: #e8e0d0;
+    --accent: #7c6b52;
+    --accent-light: #b5a48a;
+    --soft-red: #c0614a;
+    --rule: #d8d0c0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--paper); color: var(--ink); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; padding: 0 0 80px; }
+
+  .site-header { background: var(--ink); color: var(--paper); padding: 48px 32px 40px; position: relative; overflow: hidden; }
+  .site-header::before { content: ''; position: absolute; top: -40px; right: -40px; width: 220px; height: 220px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.07); }
+  .header-inner { max-width: 720px; margin: 0 auto; position: relative; z-index: 1; }
+  .header-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent-light); margin-bottom: 16px; }
+  .header-title { font-family: 'Lora', serif; font-size: clamp(24px, 4.5vw, 34px); font-weight: 400; line-height: 1.25; margin-bottom: 16px; }
+  .header-title em { font-style: italic; color: var(--accent-light); }
+  .header-desc { font-size: 15px; line-height: 1.7; color: rgba(250,248,243,0.7); max-width: 540px; }
+
+  .progress-wrap { background: var(--warm); padding: 16px 32px; border-bottom: 1px solid #ddd8cc; position: sticky; top: 0; z-index: 10; }
+  .progress-inner { max-width: 720px; margin: 0 auto; }
+  .progress-label { font-size: 12px; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 8px; display: flex; justify-content: space-between; }
+  .progress-bar { height: 4px; background: var(--warm); border-radius: 4px; overflow: hidden; border: 1px solid var(--rule); }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.4s ease; width: 0%; }
+
+  .main { max-width: 720px; margin: 0 auto; padding: 48px 32px 0; }
+
+  .respondent-banner { background: var(--ink); color: var(--paper); border-radius: 8px; padding: 20px 24px; margin-bottom: 40px; }
+  .respondent-banner p { font-size: 13.5px; line-height: 1.6; opacity: 0.8; margin-top: 8px; }
+  .respondent-banner strong { font-size: 15px; font-family: 'Lora', serif; font-weight: 600; }
+
+  .name-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .field-label { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; display: block; }
+
+  .section { margin-bottom: 56px; }
+  .section-number { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent-light); margin-bottom: 6px; }
+  .section-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+  .section-desc { font-size: 14px; color: var(--accent); line-height: 1.6; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--warm); }
+
+  .question { margin-bottom: 32px; }
+  .question-label { font-family: 'Lora', serif; font-size: 16px; font-style: italic; color: var(--ink); line-height: 1.5; margin-bottom: 10px; display: block; }
+  .question-hint { font-size: 12.5px; color: var(--accent-light); margin-bottom: 10px; line-height: 1.5; }
+
+  textarea, input[type="text"] { width: 100%; background: white; border: 1px solid #d8d0c0; border-radius: 6px; padding: 14px 16px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 300; color: var(--ink); line-height: 1.6; transition: border-color 0.2s, box-shadow 0.2s; outline: none; resize: vertical; }
+  textarea:focus, input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,107,82,0.12); }
+  textarea { min-height: 100px; }
+
+  .radio-group, .check-group { display: flex; flex-direction: column; gap: 10px; }
+  .radio-group label, .check-group label { display: flex; align-items: flex-start; gap: 10px; font-size: 14.5px; line-height: 1.5; cursor: pointer; color: var(--ink); padding: 10px 14px; border: 1px solid #d8d0c0; border-radius: 6px; background: white; transition: border-color 0.2s, background 0.2s; }
+  .radio-group label:hover, .check-group label:hover { border-color: var(--accent); background: #fdf9f4; }
+  .radio-group input, .check-group input { margin-top: 2px; accent-color: var(--accent); flex-shrink: 0; width: auto; }
+
+  .submit-area { background: var(--warm); border-radius: 10px; padding: 32px; text-align: center; margin-top: 48px; }
+  .submit-area h3 { font-family: 'Lora', serif; font-size: 20px; margin-bottom: 10px; font-weight: 600; }
+  .submit-area p { font-size: 13.5px; color: var(--accent); line-height: 1.6; margin-bottom: 24px; }
+  .btn-submit { background: var(--ink); color: var(--paper); border: none; border-radius: 6px; padding: 14px 32px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; transition: opacity 0.2s; margin: 6px; }
+  .btn-submit:hover { opacity: 0.85; }
+  .btn-print { background: transparent; color: var(--ink); border: 1px solid var(--accent); border-radius: 6px; padding: 14px 32px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; margin: 6px; }
+  .copy-status { margin-top: 16px; font-size: 13px; color: var(--accent); min-height: 20px; }
+
+  @media (max-width: 540px) { .name-row { grid-template-columns: 1fr; } .site-header, .main { padding-left: 20px; padding-right: 20px; } .progress-wrap { padding-left: 20px; padding-right: 20px; } }
+  @media print { .progress-wrap, .submit-area { display: none; } body { background: white; } textarea, input { border: 1px solid #ccc; } }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-label">Parent Pathfinder — Questionnaire 2</div>
+    <h1 class="header-title">Navigating a Diagnosis<br><em>When the biggest challenge isn't defiance</em></h1>
+    <p class="header-desc">Your child has a diagnosis. The road has still been hard — just differently. Your experience navigating the system, finding help, and figuring things out as you go matters just as much.</p>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-inner">
+    <div class="progress-label"><span>Your progress</span><span id="pct">0% complete</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+</div>
+
+<main class="main">
+
+  <div class="respondent-banner">
+    <strong>A note before you start</strong>
+    <p>There are no right answers here. Write what's true for you, even if it feels messy or incomplete. Your honest experience is exactly what we need.</p>
+  </div>
+
+  <div class="name-row">
+    <div><label class="field-label" for="resp-name">Your name</label><input type="text" id="resp-name" placeholder="e.g. Sarah"></div>
+    <div><label class="field-label" for="resp-relation">Your relationship to the child</label><input type="text" id="resp-relation" placeholder="e.g. Mother, Father, Guardian"></div>
+  </div>
+  <div class="name-row" style="margin-bottom: 16px;">
+    <div>
+      <label class="field-label" for="resp-email">Your email <span style="color:var(--soft-red);">*</span></label>
+      <input type="text" id="resp-email" placeholder="e.g. yourname@email.com">
+      <span style="font-size:12px; color:var(--accent-light); margin-top:5px; display:block;">Never shared publicly.</span>
+    </div>
+    <div>
+      <label class="field-label" for="resp-phone">Phone <span style="font-weight:400; text-transform:none; letter-spacing:0; color:var(--accent-light);">(optional)</span></label>
+      <input type="text" id="resp-phone" placeholder="e.g. 555-867-5309">
+    </div>
+  </div>
+  <div style="margin-bottom: 40px;"><label class="field-label" for="child-name">Child's first name (nickname is fine)</label><input type="text" id="child-name" placeholder="e.g. Emma"></div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-number">Section 01</div>
+    <div class="section-title">The Diagnosis</div>
+    <div class="section-desc">How you got here, what you were told, and how the system responded.</div>
+
+    <div class="question">
+      <label class="question-label">What is your child's diagnosis, and how old were they when they received it?</label>
+      <textarea placeholder="List all diagnoses, even if they came at different times..."></textarea>
+    </div>
+
+    <div class="question">
+      <label class="question-label">Who gave you the diagnosis, and what did they tell you to do next?</label>
+      <span class="question-hint">A pediatrician, psychiatrist, psychologist, school evaluation? Did you get a clear next step or were you mostly on your own?</span>
+      <textarea placeholder="Who diagnosed your child and what guidance followed..."></textarea>
+    </div>
+
+    <div class="question">
+      <label class="question-label">Before the formal diagnosis, what did your child's regular doctor say about your concerns?</label>
+      <span class="question-hint">Did they take you seriously? Dismiss you? Refer you somewhere?</span>
+      <textarea placeholder="Your PCP's response to your early concerns..."></textarea>
+    </div>
+
+    <div class="question">
+      <label class="question-label">How did you feel in the weeks after receiving the diagnosis?</label>
+      <div class="check-group">
+        <label><input type="checkbox"> Relieved — finally had a name for what I was seeing</label>
+        <label><input type="checkbox"> Overwhelmed — didn't know where to start</label>
+        <label><input type="checkbox"> Skeptical — wasn't sure the diagnosis was right</label>
+        <label><input type="checkbox"> Confident — I had a plan and was ready to act</label>
+        <label><input type="checkbox"> Alone — felt like I was navigating this without support</label>
+        <label><input type="checkbox"> Hopeful — believed the right help was out there</label>
+        <label><input type="checkbox"> Frustrated — had already been trying to get answers for a while</label>
+      </div>
+      <div style="margin-top: 12px;"><textarea placeholder="Anything else about how you felt..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-number">Section 02</div>
+    <div class="section-title">What Your Child Actually Struggles With</div>
+    <div class="section-desc">Every diagnosis looks different. We want to understand your child's specific daily challenges — whatever they are.</div>
+
+    <div class="question">
+      <label class="question-label">What is the hardest part of daily life with your child right now?</label>
+      <span class="question-hint">Not the diagnosis — the actual day-to-day reality. What does a hard day look like?</span>
+      <textarea placeholder="Describe a recent difficult day..."></textarea>
+    </div>
+
+    <div class="question">
+      <label class="question-label">What does your child struggle with most? (Check all that apply)</label>
+      <div class="check-group">
+        <label><input type="checkbox"> Sensory sensitivities — sounds, textures, environments</label>
+        <label><input type="checkbox"> Social interactions and relationships</label>
+        <label><input type="checkbox"> Academic challenges or learning differences</label>
+        <label><input type="checkbox"> Emotional regulation — meltdowns, shutdowns</label>
+        <label><input type="checkbox"> Anxiety — worry, avoidance, physical symptoms</label>
+        <label><input type="checkbox"> Communication difficulties</label>
+        <label><input type="checkbox"> Daily living tasks — self-care, routines</label>
+        <label><input type="checkbox"> Sleep difficulties</label>
+        <label><input type="checkbox"> Attention and focus</label>
+      </div>
+    </div>
+
+    <div class="question">
+      <label class="question-label">How would you describe your child's relationship with authority and rules — even if defiance isn't the main issue?</label>
+      <textarea placeholder="How does your child respond to limits, requests, or expectations..."></textarea>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-number">Section 03</div>
+    <div class="section-title">The Help You've Tried</div>
+    <div class="section-desc">What you've pursued, what helped, and what left you with more questions than answers.</div>
+
+    <div class="question">
+      <label class="question-label">What types of professional help have you tried? (Check all that apply)</label>
+      <div class="check-group">
+        <label><input type="checkbox"> Therapy or counseling</label>
+        <label><input type="checkbox"> Psychiatry or medication management</label>
+        <label><input type="checkbox"> ABA therapy</label>
+        <label><input type="checkbox"> Occupational therapy</label>
+        <label><input type="checkbox"> PCIT (Parent-Child Interaction Therapy)</label>
+        <label><input type="checkbox"> Speech therapy</label>
+        <label><input type="checkbox"> School-based services or support</label>
+        <label><input type="checkbox"> Parent coaching or training programs</label>
+        <label><input type="checkbox"> Medication</label>
+        <label><input type="checkbox"> Alternative or holistic approaches</label>
+      </div>
+    </div>
+
+    <div class="question">
+      <label class="question-label">What has actually helped — even a little?</label>
+      <textarea placeholder="What does progress look like when something is working?"></textarea>
+    </div>
+
+    <div class="question">
+      <label class="question-label">What felt like it was going nowhere?</label>
+      <textarea placeholder="What cost you time, money, or hope without payoff?"></textarea>
+    </div>
+
+    <div class="question">
+      <label class="question-label">Did you ever feel like a provider was more focused on their process than your child's actual progress?</label>
+      <div class="radio-group">
+        <label><input type="radio" name="billing"> Yes — and I knew it at the time</label>
+        <label><input type="radio" name="billing"> Yes — but I only realized it looking back</label>
+        <label><input type="radio" name="billing"> Maybe — hard to say</label>
+        <label><input type="radio" name="billing"> No — I felt genuinely supported</label>
+      </div>
+      <div style="margin-top: 12px;"><textarea placeholder="Any details you'd like to add..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section">
+    <div class="section-number">Section 04</div>
+    <div class="section-title">Where You Are Now</div>
+
+    <div class="question">
+      <label class="question-label">How old is your child now, and what are you most worried about for their future?</label>
+      <textarea placeholder="Their age, and the fears you carry..."></textarea>
+    </div>
+
+    <div class="question">
+      <label class="question-label">What do you still feel like you don't understand — about your child's condition or how to help them?</label>
+      <textarea placeholder="The gaps. The unanswered questions..."></textarea>
+    </div>
+
+    <div class="question">
+      <label class="question-label">How are YOU doing — not as a parent, as a person?</label>
+      <span class="question-hint">Be honest. This matters.</span>
+      <textarea placeholder="Your own mental state, support system, what you need..."></textarea>
+    </div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="section">
+    <div class="section-number">Section 05</div>
+    <div class="section-title">What You Wish Someone Had Told You</div>
+
+    <div class="question">
+      <label class="question-label">If you could hand your past self a note on the day of the diagnosis, what would it say?</label>
+      <textarea placeholder="Write what comes..."></textarea>
+    </div>
+
+    <div class="question">
+      <label class="question-label">What's the one thing you'd tell every parent to try first?</label>
+      <textarea placeholder="Your strongest recommendation..."></textarea>
+    </div>
+
+    <div class="question">
+      <label class="question-label">What would have helped YOU feel less alone in this?</label>
+      <textarea placeholder="A resource, a person, a community, a piece of information..."></textarea>
+    </div>
+
+    <div class="question">
+      <label class="question-label">Is there anything else you want to say that we haven't asked?</label>
+      <textarea placeholder="Open space — anything goes."></textarea>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="submit-area">
+    <h3>When you're finished</h3>
+    <p>Hit <strong>Submit My Responses</strong> to send your answers. Once submitted, a print option will appear so you can save a copy.</p>
+    <form id="mainForm" action="https://formspree.io/f/mwvwenen" method="POST" onsubmit="handleSubmit(event)">
+      <input type="hidden" name="questionnaire" value="Q2 — Diagnosed, Defiance Not Primary">
+      <input type="hidden" name="respondent_name" id="fs-name">
+      <input type="hidden" name="respondent_relation" id="fs-relation">
+      <input type="hidden" name="respondent_email" id="fs-email">
+      <input type="hidden" name="respondent_phone" id="fs-phone">
+      <input type="hidden" name="child_name" id="fs-child">
+      <input type="hidden" name="all_responses" id="fs-responses">
+      <button type="submit" class="btn-submit" id="submitBtn">Submit My Responses</button>
+    </form>
+    <div id="printWrap" style="display:none; margin-top:16px;">
+      <button type="button" class="btn-print" onclick="window.print()">Print / Save as PDF</button>
+    </div>
+    <div class="copy-status" id="copyStatus"></div>
+  </div>
+
+</main>
+
+<script>
+  function updateProgress() {
+    const all = document.querySelectorAll('textarea, input[type="text"]');
+    let filled = 0;
+    all.forEach(el => { if (el.value.trim().length > 2) filled++; });
+    const pct = Math.min(100, Math.round((filled / all.length) * 100));
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('pct').textContent = pct + '% complete';
+  }
+  document.addEventListener('input', updateProgress);
+  document.addEventListener('change', updateProgress);
+
+  function buildResponses() {
+    const name = document.getElementById('resp-name').value || 'Respondent';
+    const child = document.getElementById('child-name').value || 'Child';
+    let out = `PARENT PATHFINDER — Q2 RESPONSES\nCompleted by: ${name} | Child: ${child}\nDate: ${new Date().toLocaleDateString()}\n${'─'.repeat(50)}\n\n`;
+    document.querySelectorAll('.section').forEach(sec => {
+      const title = sec.querySelector('.section-title');
+      if (title) out += `\n== ${title.textContent.toUpperCase()} ==\n\n`;
+      sec.querySelectorAll('.question').forEach(q => {
+        const label = q.querySelector('.question-label');
+        if (label) out += `Q: ${label.textContent.trim()}\n`;
+        const ta = q.querySelector('textarea');
+        if (ta && ta.value.trim()) out += `A: ${ta.value.trim()}\n`;
+        const inp = q.querySelector('input[type="text"]');
+        if (inp && inp.value.trim()) out += `A: ${inp.value.trim()}\n`;
+        const checked = q.querySelectorAll('input:checked');
+        if (checked.length) { out += `A: `; checked.forEach((c, i) => { out += (i > 0 ? ', ' : '') + c.parentElement.textContent.trim(); }); out += '\n'; }
+        out += '\n';
+      });
+    });
+    return out;
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const st = document.getElementById('copyStatus');
+    document.getElementById('fs-name').value = document.getElementById('resp-name').value;
+    document.getElementById('fs-relation').value = document.getElementById('resp-relation').value;
+    document.getElementById('fs-email').value = document.getElementById('resp-email').value;
+    document.getElementById('fs-phone').value = document.getElementById('resp-phone').value;
+    document.getElementById('fs-child').value = document.getElementById('child-name').value;
+    document.getElementById('fs-responses').value = buildResponses();
+    st.textContent = 'Sending...';
+    try {
+      const res = await fetch('https://formspree.io/f/mwvwenen', { method: 'POST', body: new FormData(document.getElementById('mainForm')), headers: { 'Accept': 'application/json' } });
+      if (res.ok) {
+        st.textContent = '✓ Your responses have been submitted. Thank you for sharing your story.';
+        // Show grounding doc link
+        const groundingLink = document.createElement('div');
+        groundingLink.style.cssText = 'margin-top:24px; padding:20px 24px; background:#1a1a2e; border-radius:8px; text-align:center;';
+        groundingLink.innerHTML = `
+          <p style="font-family:Lora,serif; font-size:16px; color:#faf8f3; margin-bottom:8px; font-style:italic;">You just did something hard.</p>
+          <p style="font-size:13px; color:rgba(250,248,243,0.65); line-height:1.6; margin-bottom:16px;">If it's late and you're struggling — we built something for you. A personal grounding document you can fill out, print, and keep for the hardest days.</p>
+          <a href="grounding.html" style="display:inline-block; background:#faf8f3; color:#1a1a2e; text-decoration:none; border-radius:6px; padding:12px 28px; font-family:DM Sans,sans-serif; font-size:14px; font-weight:500;">Create My Grounding Document →</a>
+        `;
+        document.getElementById('copyStatus').after(groundingLink);
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('submitBtn').textContent = 'Submitted ✓';
+        document.getElementById('printWrap').style.display = 'block';
+      } else { st.textContent = 'Something went wrong. Please try printing your responses instead.'; }
+    } catch { st.textContent = 'Could not connect. Please try printing your responses instead.'; }
+  }
+</script>
+</body>
+</html>

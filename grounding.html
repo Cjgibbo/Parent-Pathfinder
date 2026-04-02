@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Grounding Document — Parent Pathfinder</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --paper: #faf8f3;
+    --warm: #e8e0d0;
+    --accent: #7c6b52;
+    --accent-light: #b5a48a;
+    --rule: #d8d0c0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* Screen only header */
+  .site-header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 40px 32px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  .site-header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .header-inner { max-width: 680px; margin: 0 auto; position: relative; z-index: 1; }
+  .header-label {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent-light);
+    margin-bottom: 12px;
+  }
+  .header-title {
+    font-family: 'Lora', serif;
+    font-size: clamp(22px, 4vw, 32px);
+    font-weight: 400;
+    line-height: 1.3;
+    margin-bottom: 14px;
+  }
+  .header-title em { font-style: italic; color: var(--accent-light); }
+  .header-desc {
+    font-size: 14px;
+    line-height: 1.7;
+    color: rgba(250,248,243,0.65);
+    max-width: 520px;
+  }
+
+  /* Notice bar */
+  .notice {
+    background: var(--warm);
+    border-bottom: 1px solid var(--rule);
+    padding: 14px 32px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--accent);
+    line-height: 1.5;
+  }
+  .notice strong { color: var(--ink); }
+
+  /* Main */
+  .main { max-width: 680px; margin: 0 auto; padding: 48px 32px 0; }
+
+  /* Identity row */
+  .identity-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .field-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-light);
+    margin-bottom: 8px;
+    display: block;
+  }
+  input[type="text"] {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--rule);
+    padding: 8px 0;
+    font-family: 'Lora', serif;
+    font-size: 16px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type="text"]:focus { border-bottom-color: var(--accent); }
+
+  /* Prompt block */
+  .prompt-block {
+    margin-bottom: 52px;
+  }
+  .prompt-number {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent-light);
+    margin-bottom: 6px;
+  }
+  .prompt-question {
+    font-family: 'Lora', serif;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.4;
+    margin-bottom: 6px;
+  }
+  .prompt-hint {
+    font-size: 13px;
+    color: var(--accent-light);
+    line-height: 1.6;
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+
+  /* Answer area — lined paper feel */
+  .answer-area {
+    position: relative;
+  }
+  textarea {
+    width: 100%;
+    min-height: 120px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--rule);
+    padding: 0 0 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 2;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s;
+  }
+  textarea:focus { border-bottom-color: var(--accent); }
+
+  /* The one thing — special treatment */
+  .one-thing textarea {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    font-style: italic;
+    min-height: 80px;
+    color: var(--ink);
+  }
+
+  /* Divider */
+  .section-break {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 48px 0;
+  }
+  .section-break::before, .section-break::after {
+    content: '';
+    flex: 1;
+    border-top: 1px solid var(--rule);
+  }
+  .section-break span {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent-light);
+    white-space: nowrap;
+  }
+
+  /* Print area */
+  .print-area {
+    background: var(--warm);
+    border-radius: 10px;
+    padding: 32px;
+    text-align: center;
+    margin-top: 56px;
+  }
+  .print-area h3 {
+    font-family: 'Lora', serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .print-area p {
+    font-size: 13.5px;
+    color: var(--accent);
+    line-height: 1.6;
+    margin-bottom: 24px;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .btn-print {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 6px;
+    padding: 14px 36px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-print:hover { opacity: 0.85; }
+  .btn-clear {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 14px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    margin-left: 12px;
+    transition: border-color 0.2s;
+  }
+  .btn-clear:hover { border-color: var(--accent); }
+
+  @media (max-width: 540px) {
+    .identity-row { grid-template-columns: 1fr; }
+    .site-header, .main, .notice { padding-left: 20px; padding-right: 20px; }
+  }
+
+  /* ===== PRINT STYLES ===== */
+  @media print {
+    @page {
+      margin: 0.75in 0.85in;
+      size: letter;
+    }
+
+    body {
+      background: white;
+      font-size: 12pt;
+      color: #111;
+    }
+
+    .site-header, .notice, .print-area { display: none; }
+
+    .main {
+      padding: 0;
+      max-width: 100%;
+    }
+
+    /* Print header */
+    .main::before {
+      content: 'My Grounding Document';
+      display: block;
+      font-family: 'Lora', serif;
+      font-size: 22pt;
+      font-weight: 400;
+      color: #111;
+      margin-bottom: 4pt;
+    }
+    .main::after {
+      content: 'Parent Pathfinder  ·  For personal use  ·  Not a medical document';
+      display: block;
+      font-size: 8pt;
+      color: #999;
+      letter-spacing: 0.08em;
+      margin-bottom: 28pt;
+      padding-bottom: 14pt;
+      border-bottom: 0.5pt solid #ccc;
+    }
+
+    .identity-row {
+      display: flex;
+      gap: 40pt;
+      margin-bottom: 28pt;
+      padding-bottom: 16pt;
+      border-bottom: 0.5pt solid #ccc;
+    }
+
+    input[type="text"] {
+      border: none;
+      border-bottom: 0.5pt solid #999;
+      padding: 4pt 0;
+      font-size: 13pt;
+      font-family: 'Lora', serif;
+    }
+
+    .prompt-block {
+      margin-bottom: 32pt;
+      page-break-inside: avoid;
+    }
+
+    .prompt-number {
+      font-size: 8pt;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #999;
+      margin-bottom: 4pt;
+    }
+
+    .prompt-question {
+      font-family: 'Lora', serif;
+      font-size: 13pt;
+      font-weight: 600;
+      margin-bottom: 4pt;
+    }
+
+    .prompt-hint {
+      font-size: 9pt;
+      color: #888;
+      margin-bottom: 10pt;
+    }
+
+    textarea {
+      border: none;
+      border-bottom: 0.5pt solid #ccc;
+      font-size: 11pt;
+      min-height: 60pt;
+      padding-bottom: 6pt;
+    }
+
+    .one-thing textarea {
+      font-family: 'Lora', serif;
+      font-size: 13pt;
+      font-style: italic;
+    }
+
+    .section-break {
+      margin: 24pt 0;
+    }
+    .section-break::before, .section-break::after {
+      border-top: 0.5pt solid #ccc;
+    }
+    .section-break span {
+      font-size: 7pt;
+      color: #bbb;
+    }
+
+    .field-label { font-size: 8pt; color: #999; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-label">Parent Pathfinder</div>
+    <h1 class="header-title">My Grounding Document<br><em>For the days you've lost track of who you are in all of this</em></h1>
+    <p class="header-desc">This is not advice. It's not a form. It's yours. Answer honestly — nobody sees this but you. Print it when you're done and keep it somewhere real.</p>
+  </div>
+</header>
+
+<div class="notice">
+  <strong>Nothing you write here is sent anywhere.</strong> This page has no submit button. Your answers stay on your screen until you print or close the tab.
+</div>
+
+<main class="main">
+
+  <div class="identity-row">
+    <div>
+      <label class="field-label" for="my-name">Your name</label>
+      <input type="text" id="my-name" placeholder="Write your name here">
+    </div>
+    <div>
+      <label class="field-label" for="doc-date">Date</label>
+      <input type="text" id="doc-date" placeholder="Today's date">
+    </div>
+  </div>
+
+  <!-- Q1 -->
+  <div class="prompt-block">
+    <div class="prompt-number">01</div>
+    <div class="prompt-question">Who were you as a parent before all of this got this hard?</div>
+    <p class="prompt-hint">What did you believe parenting was going to look like? What kind of parent did you set out to be?</p>
+    <div class="answer-area">
+      <textarea placeholder="Write freely. No one is reading this."></textarea>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="prompt-block">
+    <div class="prompt-number">02</div>
+    <div class="prompt-question">What do you know to be true about your child — underneath the behavior?</div>
+    <p class="prompt-hint">Not what they do on the hard days. Who are they? What have you seen in them that nobody else gets to see?</p>
+    <div class="answer-area">
+      <textarea placeholder="This one takes a minute. Give it the time it deserves."></textarea>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="prompt-block">
+    <div class="prompt-number">03</div>
+    <div class="prompt-question">What are you most afraid of for their future?</div>
+    <p class="prompt-hint">Name it. The fear you carry quietly. The thing you don't say out loud because it feels too big.</p>
+    <div class="answer-area">
+      <textarea placeholder="Say it here. It's safe to name it."></textarea>
+    </div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="prompt-block">
+    <div class="prompt-number">04</div>
+    <div class="prompt-question">What are you trying to build for them — even when it feels impossible?</div>
+    <p class="prompt-hint">The version of their future you're still fighting for. Even on days when you can barely see it.</p>
+    <div class="answer-area">
+      <textarea placeholder="What does the good version look like, even if it feels far away?"></textarea>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="prompt-block">
+    <div class="prompt-number">05</div>
+    <div class="prompt-question">What has this cost you — honestly?</div>
+    <p class="prompt-hint">Sleep. Relationships. Your sense of self. Things you've given up. Things you've lost. You're allowed to name it.</p>
+    <div class="answer-area">
+      <textarea placeholder="This is for you. Not for anyone else."></textarea>
+    </div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="prompt-block">
+    <div class="prompt-number">06</div>
+    <div class="prompt-question">What have you done right — even when it didn't feel like it?</div>
+    <p class="prompt-hint">The moments you showed up anyway. The times you came back after a hard one. Evidence you can point to that you are not the story you tell yourself on the worst days.</p>
+    <div class="answer-area">
+      <textarea placeholder="Don't skip this one."></textarea>
+    </div>
+  </div>
+
+  <div class="section-break"><span>The one thing</span></div>
+
+  <!-- Q7 — The One Thing -->
+  <div class="prompt-block one-thing">
+    <div class="prompt-number">07</div>
+    <div class="prompt-question">The one thing you want to remember on the worst days.</div>
+    <p class="prompt-hint">Not a quote. Not advice. Yours. In your words. The thing that is true even when nothing else feels true.</p>
+    <div class="answer-area">
+      <textarea placeholder="Write it here. This is the one you come back to."></textarea>
+    </div>
+  </div>
+
+  <!-- Print -->
+  <div class="print-area">
+    <h3>This belongs to you</h3>
+    <p>Print this page or save it as a PDF. Keep it somewhere you'll find it on a hard day. You don't have to share it with anyone.</p>
+    <button class="btn-print" onclick="window.print()">Print / Save as PDF</button>
+    <button class="btn-clear" onclick="clearAll()">Start over</button>
+  </div>
+
+</main>
+
+<script>
+  // Auto-fill today's date
+  const dateField = document.getElementById('doc-date');
+  if (!dateField.value) {
+    const now = new Date();
+    dateField.value = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  }
+
+  // Auto-expand textareas
+  document.querySelectorAll('textarea').forEach(ta => {
+    ta.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = this.scrollHeight + 'px';
+    });
+  });
+
+  // Clear all
+  function clearAll() {
+    if (confirm('Clear all your answers and start over?')) {
+      document.querySelectorAll('textarea').forEach(ta => {
+        ta.value = '';
+        ta.style.height = 'auto';
+      });
+      document.getElementById('my-name').value = '';
+      const now = new Date();
+      document.getElementById('doc-date').value = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    }
+  }
+</script>
+</body>
+</html>
