@@ -232,7 +232,7 @@
   <div class="submit-area">
     <h3>When you're finished</h3>
     <p>Hit <strong>Submit My Responses</strong> to send your answers. Once submitted, a print option will appear so you can keep a copy.</p>
-    <form id="mainForm" action="https://formspree.io/f/mwvwenen" method="POST" onsubmit="handleSubmit(event)">
+    <form id="mainForm" action="https://formspree.io/f/xojpgbeg" method="POST" onsubmit="handleSubmit(event)">
       <input type="hidden" name="questionnaire" value="Q3 — No Diagnosis Yet">
       <input type="hidden" name="respondent_name" id="fs-name">
       <input type="hidden" name="respondent_relation" id="fs-relation">
@@ -295,7 +295,7 @@
     document.getElementById('fs-responses').value = buildResponses();
     st.textContent = 'Sending...';
     try {
-      const res = await fetch('https://formspree.io/f/mwvwenen', { method: 'POST', body: new FormData(document.getElementById('mainForm')), headers: { 'Accept': 'application/json' } });
+      const res = await fetch('https://formspree.io/f/xojpgbeg', { method: 'POST', body: new FormData(document.getElementById('mainForm')), headers: { 'Accept': 'application/json' } });
       if (res.ok) {
         st.textContent = '✓ Your responses have been submitted. Thank you for sharing your story.';
         // Show grounding doc link
