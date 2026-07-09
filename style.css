@@ -402,6 +402,143 @@ footer .contact a:hover { color: var(--ember-bright); border-color: var(--ember)
   margin-bottom: 4px;
 }
 
+/* ---------- Article (full guide reads) ---------- */
+.article-header {
+  padding: 80px 0 8px;
+}
+
+.article-header .eyebrow { margin-bottom: 16px; }
+
+.article-header h1 {
+  font-size: clamp(32px, 5vw, 48px);
+  line-height: 1.15;
+  max-width: 18ch;
+}
+
+.article-header .subtitle {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dust);
+  margin-top: 16px;
+}
+
+.article-body {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 40px 24px 8px;
+}
+
+.article-body p {
+  margin: 0 0 22px 0;
+  color: var(--paper);
+  font-size: 16.5px;
+  line-height: 1.75;
+}
+
+.article-body h2 {
+  font-size: 25px;
+  margin: 56px 0 20px 0;
+  padding-top: 32px;
+  border-top: 1px solid var(--line);
+}
+
+.article-body h2:first-of-type {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 8px;
+}
+
+.article-body h3 {
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 19px;
+  color: var(--ember-bright);
+  margin: 36px 0 14px 0;
+}
+
+.article-body .closing-line {
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-size: 21px;
+  text-align: center;
+  margin: 64px 0 16px 0;
+  color: var(--paper);
+}
+
+/* ---------- Companion / quick-reference card ---------- */
+.companion {
+  padding: 16px 0 64px;
+}
+
+.companion-inner {
+  background: var(--ink-2);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--ember);
+  padding: 36px 28px;
+}
+
+.companion-inner .eyebrow { margin-bottom: 10px; }
+
+.companion-inner h2 {
+  font-size: 24px;
+  margin: 0 0 8px 0;
+  padding: 0;
+  border: none;
+}
+
+.companion-inner > p.lead {
+  color: var(--paper-dim);
+  font-size: 15px;
+  margin: 0 0 32px 0;
+}
+
+.companion-block { margin-bottom: 32px; }
+
+.companion-block:last-child { margin-bottom: 0; }
+
+.companion-block h3 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dust);
+  margin: 0 0 14px 0;
+  font-weight: 500;
+}
+
+.companion-block ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.companion-block li {
+  padding: 9px 0 9px 16px;
+  border-left: 1px solid var(--line);
+  margin-bottom: 6px;
+  color: var(--paper-dim);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.companion-block .question {
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-size: 19px;
+  color: var(--ember-bright);
+  margin: 0 0 6px 0;
+}
+
+.companion-block p {
+  color: var(--paper-dim);
+  font-size: 15px;
+  margin: 0 0 10px 0;
+  line-height: 1.6;
+}
+
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; scroll-behavior: auto !important; }
