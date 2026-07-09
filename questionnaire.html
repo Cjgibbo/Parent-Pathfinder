@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parent Pathfinder — Where Do You Start?</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --paper: #faf8f3;
+    --warm: #e8e0d0;
+    --accent: #7c6b52;
+    --accent-light: #b5a48a;
+    --rule: #d8d0c0;
+    --highlight: #f0ebe2;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  .site-header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 48px 32px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .site-header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+  .header-inner { max-width: 680px; margin: 0 auto; position: relative; z-index: 1; }
+  .header-label {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent-light);
+    margin-bottom: 14px;
+  }
+  .header-title {
+    font-family: 'Lora', serif;
+    font-size: clamp(24px, 4.5vw, 36px);
+    font-weight: 400;
+    line-height: 1.25;
+    margin-bottom: 16px;
+  }
+  .header-title em { font-style: italic; color: var(--accent-light); }
+  .header-desc {
+    font-size: 15px;
+    line-height: 1.7;
+    color: rgba(250,248,243,0.65);
+    max-width: 520px;
+  }
+
+  .main { max-width: 680px; margin: 0 auto; padding: 52px 32px 0; }
+
+  /* Step system */
+  .step { display: none; }
+  .step.active { display: block; }
+
+  .step-label {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent-light);
+    margin-bottom: 8px;
+  }
+  .step-question {
+    font-family: 'Lora', serif;
+    font-size: clamp(18px, 3vw, 24px);
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .step-hint {
+    font-size: 13.5px;
+    color: var(--accent-light);
+    line-height: 1.6;
+    margin-bottom: 32px;
+    font-style: italic;
+  }
+
+  /* Options */
+  .options { display: flex; flex-direction: column; gap: 12px; }
+  .option-btn {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 16px 20px;
+    text-align: left;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.5;
+    transition: border-color 0.2s, background 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .option-btn:hover {
+    border-color: var(--accent);
+    background: var(--highlight);
+    transform: translateX(3px);
+  }
+  .option-btn.selected {
+    border-color: var(--accent);
+    background: var(--highlight);
+  }
+  .option-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--warm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .option-text { flex: 1; }
+  .option-title { font-weight: 500; display: block; margin-bottom: 2px; }
+  .option-sub { font-size: 13px; color: var(--accent-light); display: block; }
+
+  /* Checkbox options for multi-select */
+  .check-options { display: flex; flex-direction: column; gap: 10px; }
+  .check-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 13px 18px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    font-size: 14.5px;
+    color: var(--ink);
+  }
+  .check-option:hover { border-color: var(--accent); background: var(--highlight); }
+  .check-option.checked { border-color: var(--accent); background: var(--highlight); }
+  .check-option input { accent-color: var(--accent); width: 16px; height: 16px; flex-shrink: 0; }
+
+  /* Navigation */
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 36px;
+  }
+  .btn-next {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 6px;
+    padding: 14px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-next:hover { opacity: 0.85; }
+  .btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-back {
+    background: transparent;
+    border: none;
+    color: var(--accent-light);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 8px 0;
+  }
+  .btn-back:hover { color: var(--accent); }
+
+  /* Progress dots */
+  .progress-dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 48px;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--warm);
+    transition: background 0.3s;
+  }
+  .dot.active { background: var(--accent); }
+  .dot.done { background: var(--accent-light); }
+
+  /* Routing message */
+  .routing-card {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 10px;
+    padding: 40px 36px;
+    text-align: center;
+    margin-top: 16px;
+  }
+  .routing-card h2 {
+    font-family: 'Lora', serif;
+    font-size: 22px;
+    font-weight: 400;
+    margin-bottom: 12px;
+  }
+  .routing-card p {
+    font-size: 14px;
+    color: rgba(250,248,243,0.65);
+    line-height: 1.7;
+    margin-bottom: 28px;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .btn-go {
+    background: var(--paper);
+    color: var(--ink);
+    border: none;
+    border-radius: 6px;
+    padding: 14px 40px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-go:hover { opacity: 0.85; }
+
+  @media (max-width: 540px) {
+    .site-header, .main { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-label">Parent Pathfinder</div>
+    <h1 class="header-title">Let's find the right<br><em>place to start.</em></h1>
+    <p class="header-desc">A few quick questions to make sure you get the questionnaire that fits your situation. There are no wrong answers — every path leads somewhere useful.</p>
+  </div>
+</header>
+
+<main class="main">
+
+  <div class="progress-dots">
+    <div class="dot active" id="dot-1"></div>
+    <div class="dot" id="dot-2"></div>
+    <div class="dot" id="dot-3"></div>
+    <div class="dot" id="dot-4"></div>
+    <div class="dot" id="dot-5"></div>
+  </div>
+
+  <!-- STEP 1: Diagnosis? -->
+  <div class="step active" id="step-1">
+    <div class="step-label">Question 1 of 5</div>
+    <div class="step-question">Has your child received a formal diagnosis from a doctor, psychiatrist, or psychologist?</div>
+    <p class="step-hint">A diagnosis given by a licensed professional — not a self-assessment or school observation alone.</p>
+    <div class="options">
+      <button class="option-btn" onclick="selectOption(1, 'yes')">
+        <div class="option-icon">✓</div>
+        <div class="option-text">
+          <span class="option-title">Yes — my child has a formal diagnosis</span>
+        </div>
+      </button>
+      <button class="option-btn" onclick="selectOption(1, 'inprocess')">
+        <div class="option-icon">⟳</div>
+        <div class="option-text">
+          <span class="option-title">We're in the process of getting evaluated</span>
+          <span class="option-sub">Appointments made or assessment underway</span>
+        </div>
+      </button>
+      <button class="option-btn" onclick="selectOption(1, 'no')">
+        <div class="option-icon">?</div>
+        <div class="option-text">
+          <span class="option-title">No diagnosis yet — but something is going on</span>
+          <span class="option-sub">I know something isn't right. We just don't have a label yet.</span>
+        </div>
+      </button>
+    </div>
+    <div class="nav-row">
+      <div></div>
+      <button class="btn-next" id="next-1" disabled onclick="goNext(1)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Which diagnosis -->
+  <div class="step" id="step-2">
+    <div class="step-label">Question 2 of 5</div>
+    <div class="step-question">Which of the following describes your child's diagnosis?</div>
+    <p class="step-hint">Select all that apply. It's common for kids to have more than one.</p>
+    <div class="check-options" id="dx-options">
+      <label class="check-option" onclick="toggleCheck(this)"><input type="checkbox" value="ADHD"> ADHD</label>
+      <label class="check-option" onclick="toggleCheck(this)"><input type="checkbox" value="ODD"> ODD — Oppositional Defiant Disorder</label>
+      <label class="check-option" onclick="toggleCheck(this)"><input type="checkbox" value="Autism"> Autism / Autism Spectrum Disorder (ASD)</label>
+      <label class="check-option" onclick="toggleCheck(this)"><input type="checkbox" value="PDA"> PDA — Pathological Demand Avoidance</label>
+      <label class="check-option" onclick="toggleCheck(this)"><input type="checkbox" value="DMDD"> DMDD — Disruptive Mood Dysregulation Disorder</label>
+      <label class="check-option" onclick="toggleCheck(this)"><input type="checkbox" value="IED"> IED — Intermittent Explosive Disorder</label>
+      <label class="check-option" onclick="toggleCheck(this)"><input type="checkbox" value="Conduct Disorder"> Conduct Disorder</label>
+      <label class="check-option" onclick="toggleCheck(this)"><input type="checkbox" value="Other"> Something else</label>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goBack(2)">← Back</button>
+      <button class="btn-next" id="next-2" disabled onclick="goNext(2)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Defiance -->
+  <div class="step" id="step-3">
+    <div class="step-label">Question 3 of 5</div>
+    <div class="step-question">How much of a daily challenge is defiance in your home?</div>
+    <p class="step-hint">Arguing, refusing, pushing back on nearly everything — how central is this to your daily experience?</p>
+    <div class="options">
+      <button class="option-btn" onclick="selectOption(3, 'primary')">
+        <div class="option-icon">🔴</div>
+        <div class="option-text">
+          <span class="option-title">It's our biggest struggle — it affects everything</span>
+          <span class="option-sub">Most days revolve around managing defiant behavior</span>
+        </div>
+      </button>
+      <button class="option-btn" onclick="selectOption(3, 'significant')">
+        <div class="option-icon">🟡</div>
+        <div class="option-text">
+          <span class="option-title">It's significant but not the only thing we deal with</span>
+          <span class="option-sub">A real challenge, alongside other things</span>
+        </div>
+      </button>
+      <button class="option-btn" onclick="selectOption(3, 'mild')">
+        <div class="option-icon">🟢</div>
+        <div class="option-text">
+          <span class="option-title">It comes and goes — or it's mild compared to other challenges</span>
+          <span class="option-sub">Other things feel harder than defiance right now</span>
+        </div>
+      </button>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goBack(3)">← Back</button>
+      <button class="btn-next" id="next-3" disabled onclick="goNext(3)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Help sought -->
+  <div class="step" id="step-4">
+    <div class="step-label">Question 4 of 5</div>
+    <div class="step-question">Have you worked with any professional to help your child?</div>
+    <p class="step-hint">Therapy, psychiatry, medication, school services, ABA, occupational therapy, PCIT — anything counts.</p>
+    <div class="options">
+      <button class="option-btn" onclick="selectOption(4, 'yes')">
+        <div class="option-icon">✓</div>
+        <div class="option-text">
+          <span class="option-title">Yes — we've worked with at least one professional</span>
+        </div>
+      </button>
+      <button class="option-btn" onclick="selectOption(4, 'no')">
+        <div class="option-icon">→</div>
+        <div class="option-text">
+          <span class="option-title">Not yet — still figuring out where to start</span>
+        </div>
+      </button>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goBack(4)">← Back</button>
+      <button class="btn-next" id="next-4" disabled onclick="goNext(4)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: How long -->
+  <div class="step" id="step-5">
+    <div class="step-label">Question 5 of 5</div>
+    <div class="step-question">How long have you been navigating this?</div>
+    <p class="step-hint">From when you first knew something was different — not from when you got a diagnosis.</p>
+    <div class="options">
+      <button class="option-btn" onclick="selectOption(5, 'lessthan1')">
+        <div class="option-icon">🌱</div>
+        <div class="option-text">
+          <span class="option-title">Less than one year</span>
+          <span class="option-sub">Still early in this journey</span>
+        </div>
+      </button>
+      <button class="option-btn" onclick="selectOption(5, '1to3')">
+        <div class="option-icon">📅</div>
+        <div class="option-text">
+          <span class="option-title">1 to 3 years</span>
+        </div>
+      </button>
+      <button class="option-btn" onclick="selectOption(5, '3to6')">
+        <div class="option-icon">📅</div>
+        <div class="option-text">
+          <span class="option-title">3 to 6 years</span>
+        </div>
+      </button>
+      <button class="option-btn" onclick="selectOption(5, 'morethan6')">
+        <div class="option-icon">🏔️</div>
+        <div class="option-text">
+          <span class="option-title">More than 6 years</span>
+          <span class="option-sub">Deep in it</span>
+        </div>
+      </button>
+    </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="goBack(5)">← Back</button>
+      <button class="btn-next" id="next-5" disabled onclick="route()">See My Questionnaire →</button>
+    </div>
+  </div>
+
+  <!-- ROUTING RESULT -->
+  <div class="step" id="step-route">
+    <div class="routing-card" id="routing-card">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const answers = { q1: null, dx: [], q3: null, q4: null, q5: null };
+
+  function selectOption(step, value) {
+    const stepEl = document.getElementById('step-' + step);
+    stepEl.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+
+    if (step === 1) answers.q1 = value;
+    if (step === 3) answers.q3 = value;
+    if (step === 4) answers.q4 = value;
+    if (step === 5) answers.q5 = value;
+
+    document.getElementById('next-' + step).disabled = false;
+  }
+
+  function toggleCheck(label) {
+    label.classList.toggle('checked');
+    const cb = label.querySelector('input');
+    cb.checked = !cb.checked;
+    const checked = document.querySelectorAll('#dx-options input:checked');
+    document.getElementById('next-2').disabled = checked.length === 0;
+    answers.dx = Array.from(checked).map(c => c.value);
+  }
+
+  function updateDots(activeStep) {
+    for (let i = 1; i <= 5; i++) {
+      const dot = document.getElementById('dot-' + i);
+      if (i < activeStep) { dot.className = 'dot done'; }
+      else if (i === activeStep) { dot.className = 'dot active'; }
+      else { dot.className = 'dot'; }
+    }
+  }
+
+  function goNext(current) {
+    // Skip step 2 if no diagnosis
+    let next = current + 1;
+    if (current === 1 && answers.q1 !== 'yes') {
+      next = 3; // skip diagnosis list
+    }
+    document.getElementById('step-' + current).classList.remove('active');
+    document.getElementById('step-' + next).classList.add('active');
+    updateDots(next);
+    window.scrollTo(0, 0);
+  }
+
+  function goBack(current) {
+    let prev = current - 1;
+    if (current === 3 && answers.q1 !== 'yes') {
+      prev = 1;
+    }
+    document.getElementById('step-' + current).classList.remove('active');
+    document.getElementById('step-' + prev).classList.add('active');
+    updateDots(prev);
+    window.scrollTo(0, 0);
+  }
+
+  function route() {
+    document.getElementById('step-5').classList.remove('active');
+    document.getElementById('step-route').classList.add('active');
+    document.querySelector('.progress-dots').style.display = 'none';
+    window.scrollTo(0, 0);
+
+    const card = document.getElementById('routing-card');
+
+    // Routing logic
+    const hasDx = answers.q1 === 'yes';
+    const defiant = answers.q3 === 'primary' || answers.q3 === 'significant';
+    const helpSought = answers.q4 === 'yes';
+    const longerThan1yr = answers.q5 !== 'lessthan1';
+
+    let dest, title, desc;
+
+    if (hasDx && defiant && helpSought && longerThan1yr) {
+      // Q1 — Primary
+      dest = 'q1.html';
+      title = "You're in the right place.";
+      desc = "Based on your answers, we'd like you to complete our primary questionnaire. Your experience — navigating a diagnosed, defiant child with professional help over time — is exactly what this resource is built around. Your honesty will help other parents find their way faster than you did.";
+    } else if (hasDx && !defiant) {
+      // Q2 — Diagnosed, defiance not primary
+      dest = 'q2.html';
+      title = "We have questions for you too.";
+      desc = "Your child has a diagnosis but defiance isn't your primary challenge right now. That's a different and equally important experience — and we want to capture it. Your questionnaire focuses on the broader journey of navigating a diagnosis and the system around it.";
+    } else {
+      // Q3 — No diagnosis or early stage
+      dest = 'q3.html';
+      title = "You belong here too.";
+      desc = "Whether you're still seeking a diagnosis, just starting out, or haven't found the right professional help yet — your experience matters. Your questionnaire is built for where you are right now. You don't have to have everything figured out to have something important to say.";
+    }
+
+    card.innerHTML = `
+      <h2>${title}</h2>
+      <p>${desc}</p>
+      <a href="${dest}" class="btn-go">Take Me to My Questionnaire →</a>
+    `;
+  }
+</script>
+</body>
+</html>
