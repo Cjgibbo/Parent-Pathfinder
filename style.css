@@ -564,6 +564,55 @@ footer .contact a:hover { color: var(--ember-bright); border-color: var(--ember)
   margin: 20px 0 0 0;
 }
 
+/* ---------- Mobile nav toggle ---------- */
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  padding: 6px;
+  margin: -6px 0;
+  cursor: pointer;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+}
+
+.nav-toggle-bar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--paper);
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.nav-toggle.is-open .nav-toggle-bar:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle.is-open .nav-toggle-bar:nth-child(2) { opacity: 0; }
+.nav-toggle.is-open .nav-toggle-bar:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+.mobile-menu {
+  display: none;
+  flex-direction: column;
+  background: var(--ink);
+  border-top: 1px solid var(--line);
+}
+
+.mobile-menu.open { display: flex; }
+
+.mobile-menu a {
+  padding: 17px 24px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+}
+
+.mobile-menu a:last-child { border-bottom: none; }
+
+.mobile-menu a.mobile-cta { color: var(--ember-bright); }
+
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; scroll-behavior: auto !important; }
@@ -573,6 +622,8 @@ footer .contact a:hover { color: var(--ember-bright); border-color: var(--ember)
 @media (max-width: 640px) {
   .hero { padding: 56px 0 40px; }
   .nav-links { display: none; }
+  .nav-cta { display: none; }
+  .nav-toggle { display: flex; }
   .nav-inner { justify-content: space-between; }
   .door-title { font-size: 21px; }
   .featured { padding: 24px 20px; }
