@@ -539,6 +539,31 @@ footer .contact a:hover { color: var(--ember-bright); border-color: var(--ember)
   line-height: 1.6;
 }
 
+/* ---------- References list ---------- */
+.refs {
+  margin: 28px 0 22px 0;
+  padding: 20px 22px;
+  border-left: 1px solid var(--line);
+  background: var(--ink-2);
+}
+
+.refs p {
+  font-size: 13px;
+  color: var(--dust);
+  margin: 0 0 8px 0;
+  line-height: 1.6;
+}
+
+.refs p:last-child { margin-bottom: 0; }
+
+.disclaimer-line {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  color: var(--dust);
+  margin: 20px 0 0 0;
+}
+
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; scroll-behavior: auto !important; }
